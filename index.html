@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Susun Senyawa Kimia</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f8ff;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+    header {
+      text-align: center;
+      padding: 10px;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #3498db, #1abc9c);
+      border-radius: 8px;
+      color: white;
+    }
+    h1 {
+      margin: 0;
+      font-size: 2em;
+    }
+    .game-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .challenge {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      font-weight: bold;
+      color: #2c3e50;
+      text-align: center;
+    }
+    .element-cards {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .element-card {
+      padding: 10px 15px;
+      border: 2px solid #3498db;
+      border-radius: 6px;
+      background-color: #ebf5fb;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .element-card:hover {
+      background-color: #d4e6f1;
+      transform: translateY(-2px);
+    }
+    .answer-area {
+      min-height: 50px;
+      border: 2px dashed #7f8c8d;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .selected-element {
+      padding: 10px 15px;
+      border: 2px solid #27ae60;
+      border-radius: 6px;
+      background-color: #eafaf1;
+      margin-right: 5px;
+      margin-bottom: 5px;
+      display: inline-block;
+      font-weight: bold;
+      position: relative;
+    }
+    .selected-element .remove {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 16px;
+      height: 16px;
+      background-color: #e74c3c;
+      color: white;
+      border-radius: 50%;
+      text-align: center;
+      font-size: 12px;
+      line-height: 16px;
+      cursor: pointer;
+    }
+    .button-area {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+    }
+    #submit-btn {
+      background-color: #2ecc71;
+      color: white;
+    }
+    #submit-btn:hover {
+      background-color: #27ae60;
+    }
+    #reset-btn {
+      background-color: #e74c3c;
+      color: white;
+    }
+    #reset-btn:hover {
+      background-color: #c0392b;
+    }
+    #next-btn {
+      background-color: #3498db;
+      color: white;
+      display: none;
+    }
+    #next-btn:hover {
+      background-color: #2980b9;
+    }
+    .feedback {
+      text-align: center;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      font-weight: bold;
+      display: none;
+    }
+    .correct {
+      background-color: #d5f5e3;
+      color: #27ae60;
+    }
+    .incorrect {
+      background-color: #fadbd8;
+      color: #e74c3c;
+    }
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      background-color: #f9f9f9;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .periodic-table-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+    }
+    .modal-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 90%;
+      max-height: 90%;
+      overflow: auto;
+    }
+    .close-modal {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .hint-area {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #hint-btn {
+      background-color: #f39c12;
+      color: white;
+    }
+    #hint-btn:hover {
+      background-color: #d35400;
+    }
+    #periodic-table-btn {
+      background-color: #9b59b6;
+      color: white;
+    }
+    #periodic-table-btn:hover {
+      background-color: #8e44ad;
+    }
+    .hint-text {
+      margin-top: 10px;
+      font-style: italic;
+      color: #7f8c8d;
+      display: none;
+    }
+    .level-indicator {
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: bold;
+      color: #34495e;
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 10px;
+      }
+      .element-card {
+        padding: 8px 12px;
+      }
+      .button-area {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Game Susun Senyawa Kimia</h1>
+      <p>Susun unsur-unsur kimia untuk membentuk senyawa yang tepat!</p>
+    </header>
+
+    <div class="level-indicator">Level: <span id="current-level">1</span> dari <span id="total-levels">10</span></div>
+
+    <div class="stats">
+      <div>Skor: <span id="score">0</span></div>
+      <div>Benar: <span id="correct-count">0</span></div>
+      <div>Salah: <span id="incorrect-count">0</span></div>
+    </div>
+
+    <div class="game-area">
+      <div class="challenge">
+        Buatlah senyawa: <span id="current-compound">H₂O</span>
+      </div>
+      
+      <div class="element-cards" id="element-choices"></div>
+      
+      <div class="answer-area" id="answer-area">
+        <div class="placeholder" id="placeholder-text">Pilih unsur-unsur di atas dan susun di sini...</div>
+      </div>
+      
+      <div class="button-area">
+        <button id="reset-btn">Reset</button>
+        <button id="hint-btn">Petunjuk</button>
+        <button id="periodic-table-btn">Tabel Periodik</button>
+        <button id="submit-btn">Periksa Jawaban</button>
+        <button id="next-btn">Level Selanjutnya</button>
+      </div>
+      
+      <div class="feedback" id="feedback"></div>
+      
+      <div class="hint-area">
+        <div class="hint-text" id="hint-text">Petunjuk akan muncul di sini...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="periodic-table-modal" id="periodic-table-modal">
+    <div class="modal-content">
+      <span class="close-modal" id="close-modal">&times;</span>
+      <h2>Tabel Periodik Unsur</h2>
+      <div id="periodic-table">
+        <!-- Tabel periodik akan dimuat dengan JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Data senyawa dengan level dan tingkat kesulitan
+    const compoundLevels = [
+      {
+        compound: "H₂O",
+        name: "Air",
+        elements: ["H", "H", "O"],
+        choices: ["H", "O", "C", "N", "He"],
+        hint: "Senyawa ini terdiri dari 2 atom Hidrogen dan 1 atom Oksigen."
+      },
+      {
+        compound: "CO₂",
+        name: "Karbon dioksida",
+        elements: ["C", "O", "O"],
+        choices: ["C", "O", "H", "N", "S"],
+        hint: "Senyawa ini terdiri dari 1 atom Karbon dan 2 atom Oksigen."
+      },
+      {
+        compound: "NH₃",
+        name: "Amonia",
+        elements: ["N", "H", "H", "H"],
+        choices: ["N", "H", "O", "C", "He"],
+        hint: "Senyawa ini terdiri dari 1 atom Nitrogen dan 3 atom Hidrogen."
+      },
+      {
+        compound: "CH₄",
+        name: "Metana",
+        elements: ["C", "H", "H", "H", "H"],
+        choices: ["C", "H", "O", "N", "P"],
+        hint: "Senyawa ini terdiri dari 1 atom Karbon dan 4 atom Hidrogen."
+      },
+      {
+        compound: "NaCl",
+        name: "Natrium klorida (Garam dapur)",
+        elements: ["Na", "Cl"],
+        choices: ["Na", "Cl", "K", "F", "Li"],
+        hint: "Senyawa ini terdiri dari 1 atom Natrium dan 1 atom Klor."
+      },
+      {
+        compound: "H₂SO₄",
+        name: "Asam sulfat",
+        elements: ["H", "H", "S", "O", "O", "O", "O"],
+        choices: ["H", "S", "O", "N", "C", "P"],
+        hint: "Senyawa ini terdiri dari 2 atom Hidrogen, 1 atom Sulfur, dan 4 atom Oksigen."
+      },
+      {
+        compound: "CaCO₃",
+        name: "Kalsium karbonat",
+        elements: ["Ca", "C", "O", "O", "O"],
+        choices: ["Ca", "C", "O", "Na", "Mg", "H"],
+        hint: "Senyawa ini terdiri dari 1 atom Kalsium, 1 atom Karbon, dan 3 atom Oksigen."
+      },
+      {
+        compound: "C₆H₁₂O₆",
+        name: "Glukosa",
+        elements: ["C", "C", "C", "C", "C", "C", "H", "H", "H", "H", "H", "H", "H", "H", "H", "H", "H", "H", "O", "O", "O", "O", "O", "O"],
+        choices: ["C", "H", "O", "N", "P", "S"],
+        hint: "Senyawa ini terdiri dari 6 atom Karbon, 12 atom Hidrogen, dan 6 atom Oksigen."
+      },
+      {
+        compound: "Fe₂O₃",
+        name: "Besi(III) oksida (Karat)",
+        elements: ["Fe", "Fe", "O", "O", "O"],
+        choices: ["Fe", "O", "Cu", "Al", "Zn", "H"],
+        hint: "Senyawa ini terdiri dari 2 atom Besi dan 3 atom Oksigen."
+      },
+      {
+        compound: "K₄[Fe(CN)₆]",
+        name: "Kalium ferosianida",
+        elements: ["K", "K", "K", "K", "Fe", "C", "C", "C", "C", "C", "C", "N", "N", "N", "N", "N", "N"],
+        choices: ["K", "Fe", "C", "N", "O", "H", "Na", "Cl"],
+        hint: "Senyawa kompleks ini terdiri dari 4 atom Kalium, 1 atom Besi, 6 atom Karbon, dan 6 atom Nitrogen."
+      }
+    ];
+
+    // Data tabel periodik sederhana
+    const periodicTableData = [
+      { symbol: "H", name: "Hidrogen", atomicNumber: 1 },
+      { symbol: "He", name: "Helium", atomicNumber: 2 },
+      { symbol: "Li", name: "Litium", atomicNumber: 3 },
+      { symbol: "Be", name: "Berilium", atomicNumber: 4 },
+      { symbol: "B", name: "Boron", atomicNumber: 5 },
+      { symbol: "C", name: "Karbon", atomicNumber: 6 },
+      { symbol: "N", name: "Nitrogen", atomicNumber: 7 },
+      { symbol: "O", name: "Oksigen", atomicNumber: 8 },
+      { symbol: "F", name: "Fluor", atomicNumber: 9 },
+      { symbol: "Ne", name: "Neon", atomicNumber: 10 },
+      { symbol: "Na", name: "Natrium", atomicNumber: 11 },
+      { symbol: "Mg", name: "Magnesium", atomicNumber: 12 },
+      { symbol: "Al", name: "Aluminium", atomicNumber: 13 },
+      { symbol: "Si", name: "Silikon", atomicNumber: 14 },
+      { symbol: "P", name: "Fosfor", atomicNumber: 15 },
+      { symbol: "S", name: "Sulfur", atomicNumber: 16 },
+      { symbol: "Cl", name: "Klor", atomicNumber: 17 },
+      { symbol: "Ar", name: "Argon", atomicNumber: 18 },
+      { symbol: "K", name: "Kalium", atomicNumber: 19 },
+      { symbol: "Ca", name: "Kalsium", atomicNumber: 20 },
+      { symbol: "Fe", name: "Besi", atomicNumber: 26 },
+      { symbol: "Cu", name: "Tembaga", atomicNumber: 29 },
+      { symbol: "Zn", name: "Seng", atomicNumber: 30 }
+    ];
+
+    // Variabel state game
+    let currentLevel = 0;
+    let currentCompound = null;
+    let selectedElements = [];
+    let score = 0;
+    let correctCount = 0;
+    let incorrectCount = 0;
+
+    // DOM Elements
+    const elementChoicesEl = document.getElementById('element-choices');
+    const answerAreaEl = document.getElementById('answer-area');
+    const placeholderTextEl = document.getElementById('placeholder-text');
+    const currentCompoundEl = document.getElementById('current-compound');
+    const submitBtn = document.getElementById('submit-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const hintBtn = document.getElementById('hint-btn');
+    const hintTextEl = document.getElementById('hint-text');
+    const feedbackEl = document.getElementById('feedback');
+    const scoreEl = document.getElementById('score');
+    const correctCountEl = document.getElementById('correct-count');
+    const incorrectCountEl = document.getElementById('incorrect-count');
+    const currentLevelEl = document.getElementById('current-level');
+    const totalLevelsEl = document.getElementById('total-levels');
+    const periodicTableBtn = document.getElementById('periodic-table-btn');
+    const periodicTableModal = document.getElementById('periodic-table-modal');
+    const closeModal = document.getElementById('close-modal');
+    const periodicTableEl = document.getElementById('periodic-table');
+
+    // Inisialisasi game
+    function initGame() {
+      totalLevelsEl.textContent = compoundLevels.length;
+      loadLevel(0);
+      createPeriodicTable();
+    }
+
+    // Buat tabel periodik
+    function createPeriodicTable() {
+      let tableHtml = '<table style="width: 100%; border-collapse: collapse;">';
+      tableHtml += '<tr><th style="padding: 10px; border: 1px solid #ddd;">No. Atom</th><th style="padding: 10px; border: 1px solid #ddd;">Simbol</th><th style="padding: 10px; border: 1px solid #ddd;">Nama</th></tr>';
+      
+      periodicTableData.forEach(element => {
+        tableHtml += `<tr>
+          <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${element.atomicNumber}</td>
+          <td style="padding: 10px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${element.symbol}</td>
+          <td style="padding: 10px; border: 1px solid #ddd;">${element.name}</td>
+        </tr>`;
+      });
+      
+      tableHtml += '</table>';
+      periodicTableEl.innerHTML = tableHtml;
+    }
+
+    // Muat level
+    function loadLevel(levelIndex) {
+      if (levelIndex >= compoundLevels.length) {
+        // Game selesai
+        feedbackEl.innerHTML = `<h2>Selamat! Kamu telah menyelesaikan semua level!</h2>
+                               <p>Skor akhir: ${score}</p>
+                               <p>Benar: ${correctCount}, Salah: ${incorrectCount}</p>`;
+        feedbackEl.className = 'feedback correct';
+        feedbackEl.style.display = 'block';
+        
+        submitBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+        hintBtn.style.display = 'none';
+        elementChoicesEl.innerHTML = '';
+        answerAreaEl.innerHTML = '';
+        return;
+      }
+
+      currentLevel = levelIndex;
+      currentLevelEl.textContent = levelIndex + 1;
+      currentCompound = compoundLevels[levelIndex];
+      
+      // Tampilkan senyawa saat ini
+      currentCompoundEl.textContent = currentCompound.compound;
+      
+      // Reset state
+      selectedElements = [];
+      placeholderTextEl.style.display = 'block';
+      answerAreaEl.innerHTML = '';
+      answerAreaEl.appendChild(placeholderTextEl);
+      
+      // Acak pilihan elemen
+      let shuffledChoices = shuffleArray([...currentCompound.choices]);
+      
+      // Tampilkan pilihan elemen
+      elementChoicesEl.innerHTML = '';
+      shuffledChoices.forEach(element => {
+        const elementCard = document.createElement('div');
+        elementCard.className = 'element-card';
+        elementCard.textContent = element;
+        elementCard.addEventListener('click', () => addElement(element));
+        elementChoicesEl.appendChild(elementCard);
+      });
+      
+      // Reset tampilan
+      feedbackEl.style.display = 'none';
+      submitBtn.style.display = 'inline-block';
+      nextBtn.style.display = 'none';
+      hintTextEl.style.display = 'none';
+    }
+
+    // Tambahkan elemen ke area jawaban
+    function addElement(element) {
+      if (placeholderTextEl.style.display !== 'none') {
+        placeholderTextEl.style.display = 'none';
+      }
+      
+      selectedElements.push(element);
+      
+      const selectedElement = document.createElement('div');
+      selectedElement.className = 'selected-element';
+      selectedElement.textContent = element;
+      
+      const removeBtn = document.createElement('span');
+      removeBtn.className = 'remove';
+      removeBtn.textContent = '×';
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const index = selectedElements.indexOf(element);
+        if (index > -1) {
+          selectedElements.splice(index, 1);
+        }
+        answerAreaEl.removeChild(selectedElement);
+        
+        if (selectedElements.length === 0) {
+          placeholderTextEl.style.display = 'block';
+        }
+      });
+      
+      selectedElement.appendChild(removeBtn);
+      answerAreaEl.appendChild(selectedElement);
+    }
+
+    // Reset jawaban
+    function resetAnswer() {
+      selectedElements = [];
+      answerAreaEl.innerHTML = '';
+      placeholderTextEl.style.display = 'block';
+      answerAreaEl.appendChild(placeholderTextEl);
+    }
+
+    // Periksa jawaban
+    function checkAnswer() {
+      const currentElements = [...currentCompound.elements];
+      let correct = true;
+      
+      // Cek apakah panjang array sama
+      if (selectedElements.length !== currentElements.length) {
+        correct = false;
+      } else {
+        // Buat salinan array untuk pencocokan
+        const remainingSelectedElements = [...selectedElements];
+        const remainingCurrentElements = [...currentElements];
+        
+        // Cek setiap elemen
+        for (let i = 0; i < remainingCurrentElements.length; i++) {
+          const element = remainingCurrentElements[i];
+          const index = remainingSelectedElements.indexOf(element);
+          
+          if (index > -1) {
+            // Elemen ditemukan, hapus dari array yang tersisa
+            remainingSelectedElements.splice(index, 1);
+          } else {
+            // Elemen tidak ditemukan
+            correct = false;
+            break;
+          }
+        }
+        
+        // Jika masih ada elemen yang tersisa di array selected, berarti jawaban salah
+        if (remainingSelectedElements.length > 0) {
+          correct = false;
+        }
+      }
+      
+      // Tampilkan feedback
+      if (correct) {
+        score += 10;
+        correctCount++;
+        feedbackEl.className = 'feedback correct';
+        feedbackEl.innerHTML = `<p>Benar! ${currentCompound.compound} adalah ${currentCompound.name}.</p>`;
+      } else {
+        incorrectCount++;
+        feedbackEl.className = 'feedback incorrect';
+        feedbackEl.innerHTML = `<p>Salah! Jawaban yang benar untuk ${currentCompound.compound} (${currentCompound.name}) adalah:</p>
+                              <p>${currentCompound.elements.join(' + ')}</p>`;
+      }
+      
+      // Update statistik
+      scoreEl.textContent = score;
+      correctCountEl.textContent = correctCount;
+      incorrectCountEl.textContent = incorrectCount;
+      
+      // Tampilkan feedback dan tombol selanjutnya
+      feedbackEl.style.display = 'block';
+      submitBtn.style.display = 'none';
+      nextBtn.style.display = 'inline-block';
+    }
+
+    // Acak array (algoritma Fisher-Yates shuffle)
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    // Event listeners
+    submitBtn.addEventListener('click', checkAnswer);
+    resetBtn.addEventListener('click', resetAnswer);
+    nextBtn.addEventListener('click', () => loadLevel(currentLevel + 1));
+    hintBtn.addEventListener('click', () => {
+      hintTextEl.textContent = currentCompound.hint;
+      hintTextEl.style.display = 'block';
+    });
+    
+    periodicTableBtn.addEventListener('click', () => {
+      periodicTableModal.style.display = 'block';
+    });
+    
+    closeModal.addEventListener('click', () => {
+      periodicTableModal.style.display = 'none';
+    });
+    
+    window.addEventListener('click', (event) => {
+      if (event.target == periodicTableModal) {
+        periodicTableModal.style.display = 'none';
+      }
+    });
+
+    // Mulai game
+    initGame();
+  </script>
+</body>
+</html>
